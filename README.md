@@ -119,6 +119,18 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 - **Frontend**: Deploy to Vercel
 - **Backend**: Deploy to Render
 
+### 🔄 Keep Backend Alive (Render Free Tier)
+
+Render's free tier spins down services after 15 minutes of inactivity. To keep your backend alive:
+
+**Quick Setup**: See [KEEP_ALIVE_QUICK_START.md](./KEEP_ALIVE_QUICK_START.md)
+
+**Recommended**: Use [cron-job.org](https://cron-job.org) (free) to ping `/health` every 5 minutes:
+- URL: `https://your-backend.onrender.com/health`
+- Schedule: `*/5 * * * *` (every 5 minutes)
+
+The frontend also includes automatic keep-alive pings when users have the app open.
+
 ## 📚 Documentation
 
 - [Setup Guide](./SETUP.md) - Detailed setup instructions

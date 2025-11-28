@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { useEffect } from 'react'
 import HomePage from './pages/HomePage'
 import CourseSearchPage from './pages/CourseSearchPage'
 import CourseDetailsPage from './pages/CourseDetailsPage'
@@ -10,8 +11,19 @@ import AnalyticsPage from './pages/AnalyticsPage'
 import AdminPage from './pages/AdminPage'
 import Layout from './components/Layout'
 import HelpButton from './components/HelpButton'
+import { startKeepAlive, stopKeepAlive } from './utils/keepAlive'
 
 function App() {
+  useEffect(() => {
+    // Start keep-alive service when app loads
+    startKeepAlive()
+    
+    // Cleanup on unmount
+    return () => {
+      stopKeepAlive()
+    }
+  }, [])
+
   return (
     <>
       <Layout>

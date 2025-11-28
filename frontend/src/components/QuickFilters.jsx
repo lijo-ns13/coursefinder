@@ -42,26 +42,28 @@ export default function QuickFilters() {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
       {quickFilters.map((item, index) => (
         <motion.button
           key={index}
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: index * 0.1 }}
           onMouseEnter={() => setHovered(index)}
           onMouseLeave={() => setHovered(null)}
           onClick={() => handleFilter(item.filter)}
-          className={`${item.color} text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105`}
+          className={`${item.color} text-white p-6 sm:p-8 rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] hover:-translate-y-1 group`}
         >
-          <div className="flex flex-col items-center space-y-2">
+          <div className="flex flex-col items-center space-y-3">
             <motion.div
               animate={{ rotate: hovered === index ? 360 : 0 }}
               transition={{ duration: 0.5 }}
+              className="p-3 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors"
             >
               {item.icon}
             </motion.div>
-            <span className="font-semibold text-sm">{item.label}</span>
+            <span className="font-semibold text-sm sm:text-base">{item.label}</span>
           </div>
         </motion.button>
       ))}

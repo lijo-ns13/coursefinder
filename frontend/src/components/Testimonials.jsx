@@ -30,32 +30,42 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <div className="py-12">
-      <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-        Loved by Students Worldwide
-      </h2>
-      <div className="grid md:grid-cols-3 gap-6">
+    <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-8 sm:mb-10"
+      >
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          Loved by Students Worldwide
+        </h2>
+        <p className="text-base sm:text-lg text-gray-600">See what our users are saying</p>
+      </motion.div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {testimonials.map((testimonial, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
-            className="card relative"
+            className="card-premium relative group hover:shadow-2xl transition-all duration-300"
           >
-            <Quote className="h-8 w-8 text-primary-200 absolute top-4 right-4" />
-            <div className="flex items-center mb-4">
-              <div className="text-4xl mr-3">{testimonial.image}</div>
-              <div>
-                <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                <p className="text-sm text-gray-600">{testimonial.role}</p>
-                <p className="text-xs text-primary-600">{testimonial.university}</p>
+            <Quote className="h-10 w-10 text-primary-100 absolute top-6 right-6 group-hover:text-primary-200 transition-colors" />
+            <div className="flex items-start mb-5">
+              <div className="text-5xl mr-4 flex-shrink-0">{testimonial.image}</div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900 text-lg mb-1">{testimonial.name}</p>
+                <p className="text-sm text-gray-600 mb-1">{testimonial.role}</p>
+                <p className="text-xs sm:text-sm text-primary-600 font-semibold truncate">{testimonial.university}</p>
               </div>
             </div>
-            <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
-            <div className="flex">
+            <p className="text-gray-700 mb-5 leading-relaxed text-base">"{testimonial.text}"</p>
+            <div className="flex items-center gap-1">
               {[...Array(testimonial.rating)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
               ))}
             </div>
           </motion.div>
