@@ -184,5 +184,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 
 For issues and questions, please open an issue on GitHub.
 
-
-<!-- Updated: 2025-12-02 14:00 -->
