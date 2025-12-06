@@ -10,7 +10,6 @@ pnpm-lock.yaml
 .env.development.local
 .env.test.local
 .env.production.local
-# But keep .env.example files
 !.env.example
 
 # Build outputs
@@ -53,23 +52,8 @@ setup/
 *.sh
 *.bash
 
-.git-filter-dates-fixed.sh
-.git-filter-dates-sh
-51
-API_KEYS_GUIDE.md 
-APPLICATION_REVIEW.md  
-apply-backdated-commits-final.ps1  
-apply-backdated-commits-simple.sh  
-apply-backdated-commits.ps1 
-apply-git-filter.ps1 
-BACKDATE_COMMITS_GUIDE.md  
-BACKDATE_INSTRUCTIONS.md 
-backdate-all-commits.ps1 
-backdate-commits-auto.ps1 
-backdate-commits-simple.ps1 
-backdate-commits.ps1 
-backdate-git-history.ps1 
-commit-dates.txt
-CONTRIBUTING.md 
-create-realistic-history.ps1 
-
+# Ignore PowerShell and text files
+*.ps1
+*.PS1
+*.txt
+*.TXT
