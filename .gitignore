@@ -46,6 +46,13 @@ commit-logs/
 env-setup/
 setup/
 
+# Ignore all markdown and shell scripts
+*.md
+*.MD
+*.markdown
+*.sh
+*.bash
+
 .git-filter-dates-fixed.sh
 .git-filter-dates-sh
 51
@@ -65,5 +72,4 @@ backdate-git-history.ps1
 commit-dates.txt
 CONTRIBUTING.md 
 create-realistic-history.ps1 
-
 
