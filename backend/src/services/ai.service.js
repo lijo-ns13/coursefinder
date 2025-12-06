@@ -33,11 +33,13 @@ export class AIService {
   static async callGroq(messages) {
     try {
       // Use available Groq models - try different ones if one fails
+      // Note: mixtral-8x7b-32768 was decommissioned on March 20, 2025
+      // Replaced with mistral-saba-24b and llama-3.3-70b-versatile
       const models = [
-        'llama-3.1-70b-versatile',
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant',
-        'mixtral-8x7b-32768'
+        'llama-3.3-70b-versatile',      // Recommended replacement
+        'mistral-saba-24b',              // New recommended model
+        'llama-3.1-70b-versatile',       // Fallback option
+        'llama-3.1-8b-instant'           // Fast fallback option
       ];
 
       let lastError = null;
