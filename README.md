@@ -154,6 +154,23 @@ See [API_KEYS_GUIDE.md](./API_KEYS_GUIDE.md) for detailed setup instructions.
 - **Twilio** - OTP sending (free trial available)
 - **OpenAlex** - Academic data (free, no key needed)
 
+## 🗄️ Database Seeding
+
+**Quick Start**: Seed your database with comprehensive course data:
+
+```bash
+cd backend
+npm run seed-comprehensive-clear
+```
+
+This will generate **675+ courses** across all categories and countries. See [SEEDING_GUIDE.md](./SEEDING_GUIDE.md) for details.
+
+### Available Seed Commands:
+- `npm run seed-comprehensive-clear` - Clear and seed 675+ courses (Recommended)
+- `npm run seed-comprehensive` - Add courses without clearing existing
+- `npm run seed-accurate` - Seed ~18 detailed courses
+- `npm run seed` - Seed 3 sample courses
+
 ## 🧪 Fetching Live Data
 
 The system fetches **real-time, accurate data** from external APIs. See [LIVE_DATA.md](./LIVE_DATA.md) for details.

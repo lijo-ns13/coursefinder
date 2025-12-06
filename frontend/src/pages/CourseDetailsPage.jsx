@@ -241,7 +241,7 @@ export default function CourseDetailsPage() {
         <div className="card">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Course Content</h2>
           <ul className="list-disc list-inside space-y-2">
-            {course.courseContent.map((content, index) => (
+            {course.courseContent?.map((content, index) => (
               <li key={index} className="text-gray-700">{content}</li>
             ))}
           </ul>
@@ -285,7 +285,7 @@ export default function CourseDetailsPage() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Top Recruiting Companies</h3>
               <div className="flex flex-wrap gap-2">
-                {course.jobOutcomes.topCompanies.map((company, index) => (
+                {course.jobOutcomes?.topCompanies?.map((company, index) => (
                   <span key={index} className="px-4 py-2 bg-primary-100 text-primary-800 rounded-lg text-sm font-medium">
                     {company}
                   </span>

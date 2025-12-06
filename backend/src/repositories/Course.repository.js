@@ -11,35 +11,86 @@ export class CourseRepository {
 
   async search(query, filters = {}) {
     const searchQuery = {};
+    const andConditions = [];
 
-    if (query) {
-      searchQuery.$text = { $search: query };
+    // Category filter - prioritize this, make it simple and reliable
+    if (filters.category) {
+      const categoryRegex = new RegExp(filters.category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      // Primary: exact category match, Secondary: name/description contains
+      andConditions.push({
+        $or: [
+          { category: categoryRegex },
+          { name: categoryRegex },
+          { description: categoryRegex }
+        ]
+      });
     }
 
+    // Text search (only if no category filter or as additional filter)
+    if (query && query.trim()) {
+      const queryRegex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      if (!filters.category) {
+        // If no category, use text search as primary
+        searchQuery.$or = [
+          { name: queryRegex },
+          { description: queryRegex },
+          { 'university.name': queryRegex },
+          { category: queryRegex }
+        ];
+      } else {
+        // If category exists, add text search to andConditions
+        andConditions.push({
+          $or: [
+            { name: queryRegex },
+            { description: queryRegex },
+            { 'university.name': queryRegex }
+          ]
+        });
+      }
+    }
+
+    // University name filter
     if (filters.universityName) {
       searchQuery['university.name'] = new RegExp(filters.universityName, 'i');
     }
 
+    // Country filter
     if (filters.country) {
       searchQuery['university.location.country'] = new RegExp(filters.country, 'i');
     }
 
-    if (filters.category) {
-      searchQuery.category = filters.category;
-    }
-
+    // Budget filters
     if (filters.minBudget || filters.maxBudget) {
       searchQuery['fees.amount'] = {};
       if (filters.minBudget) searchQuery['fees.amount'].$gte = filters.minBudget;
       if (filters.maxBudget) searchQuery['fees.amount'].$lte = filters.maxBudget;
     }
 
+    // Level filter
     if (filters.level) {
       searchQuery.level = filters.level;
     }
 
-    const courses = await Course.find(searchQuery)
-      .limit(filters.limit || 50)
+    // Combine all conditions
+    let finalQuery = searchQuery;
+    if (andConditions.length > 0) {
+      if (Object.keys(searchQuery).length > 0) {
+        finalQuery = {
+          $and: [
+            searchQuery,
+            ...andConditions
+          ]
+        };
+      } else {
+        finalQuery = andConditions.length === 1 ? andConditions[0] : { $and: andConditions };
+      }
+    }
+
+    // If no filters at all, return all courses
+    const hasFilters = Object.keys(finalQuery).length > 0;
+    
+    const courses = await Course.find(hasFilters ? finalQuery : {})
+      .limit(filters.limit || 100)
       .sort(filters.sort || { createdAt: -1 });
 
     return courses;

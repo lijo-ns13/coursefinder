@@ -73,28 +73,26 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
     return (
         <>
             <div
-                className="group relative card cursor-pointer overflow-hidden bg-gradient-to-br from-white to-gray-50 w-full"
+                className="group relative bg-white border border-gray-200 rounded-xl p-4 sm:p-6 cursor-pointer overflow-hidden hover:border-gray-300 hover:shadow-md transition-all w-full"
                 onClick={() => navigate(`/course/${course._id}`)}
             >
-                {/* Premium Gradient Accent */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500"></div>
 
                 {/* Header with Save Button */}
                 <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
                     <div className="flex-1 pr-2 min-w-0">
                         {/* Category Badge */}
                         {course.category && (
-                            <span className="inline-block badge-primary mb-2 text-xs">
+                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded-md mb-2 text-xs font-medium">
                                 {course.category}
                             </span>
                         )}
-                        <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors leading-tight">
+                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2 group-hover:text-gray-700 transition-colors leading-tight">
                             {course.name}
                         </h3>
                         {showUniversity && course.university?.name && (
                             <button
                                 onClick={handleUniversityClick}
-                                className="text-primary-600 hover:text-primary-700 text-xs sm:text-sm font-semibold mb-1 sm:mb-2 hover:underline transition-all text-left w-full truncate"
+                                className="text-gray-600 hover:text-gray-900 text-xs sm:text-sm font-medium mb-1 sm:mb-2 hover:underline transition-all text-left w-full truncate"
                             >
                                 {course.university.name}
                             </button>
@@ -103,8 +101,8 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className={`p-2 sm:p-2.5 rounded-xl transition-all transform hover:scale-110 flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation ${saved
-                                ? 'bg-gradient-to-br from-red-100 to-pink-100 text-red-600 shadow-md'
+                        className={`p-2 sm:p-2.5 rounded-lg transition-all flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center touch-manipulation ${saved
+                                ? 'bg-gray-900 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         title={saved ? 'Unsave course' : 'Save course'}
@@ -115,8 +113,8 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
 
                 {/* Location */}
                 {course.university?.location && (
-                    <div className="flex items-center text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 p-2 bg-gray-50 rounded-lg">
-                        <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-primary-600 flex-shrink-0" />
+                    <div className="flex items-center text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-gray-600 flex-shrink-0" />
                         <span className="font-medium truncate">
                             {course.university.location.city && `${course.university.location.city}, `}
                             {course.university.location.country}
@@ -127,39 +125,39 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
                 {/* Key Info Grid */}
                 <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                     {course.fees?.amount && (
-                        <div className="p-2 sm:p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg sm:rounded-xl border border-green-100">
+                        <div className="p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex items-center mb-1">
-                                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 mr-1 flex-shrink-0" />
+                                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 mr-1 flex-shrink-0" />
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate">Fees</span>
                             </div>
-                            <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">
                                 {course.fees.currency} {course.fees.amount.toLocaleString()}
                             </p>
                             <p className="text-[10px] sm:text-xs text-gray-500">/{course.fees.per}</p>
                         </div>
                     )}
                     {course.duration && (
-                        <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl border border-blue-100">
+                        <div className="p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex items-center mb-1">
-                                <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 mr-1 flex-shrink-0" />
+                                <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 mr-1 flex-shrink-0" />
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate">Duration</span>
                             </div>
-                            <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{course.duration}</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 truncate">{course.duration}</p>
                         </div>
                     )}
                     {course.university?.ranking && (
-                        <div className="p-2 sm:p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg sm:rounded-xl border border-purple-100">
+                        <div className="p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex items-center mb-1">
-                                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600 mr-1 flex-shrink-0" />
+                                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 mr-1 flex-shrink-0" />
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium truncate">Ranking</span>
                             </div>
-                            <p className="text-xs sm:text-sm font-bold text-gray-900">#{course.university.ranking}</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900">#{course.university.ranking}</p>
                         </div>
                     )}
                     {course.level && (
-                        <div className="p-2 sm:p-3 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg sm:rounded-xl border border-orange-100">
+                        <div className="p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200">
                             <span className="text-[10px] sm:text-xs text-gray-600 font-medium block mb-1">Level</span>
-                            <p className="text-xs sm:text-sm font-bold text-gray-900 capitalize truncate">{course.level}</p>
+                            <p className="text-xs sm:text-sm font-semibold text-gray-900 capitalize truncate">{course.level}</p>
                         </div>
                     )}
                 </div>
@@ -173,16 +171,16 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
 
                 {/* Fit Score Badge */}
                 {course.aiFitScore && (
-                    <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2 bg-gradient-to-r from-primary-50 to-purple-50 rounded-lg">
-                        <span className="text-xs font-semibold text-gray-700">AI Fit Score</span>
+                    <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <span className="text-xs font-medium text-gray-700">AI Fit Score</span>
                         <div className="flex items-center gap-2 w-full sm:w-auto">
                             <div className="flex-1 sm:w-20 sm:flex-none h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-primary-500 to-purple-500 rounded-full transition-all"
+                                    className="h-full bg-gray-900 rounded-full transition-all"
                                     style={{ width: `${(course.aiFitScore / 10) * 100}%` }}
                                 ></div>
                             </div>
-                            <span className="text-xs sm:text-sm font-bold text-primary-600 whitespace-nowrap">{course.aiFitScore}/10</span>
+                            <span className="text-xs sm:text-sm font-semibold text-gray-900 whitespace-nowrap">{course.aiFitScore}/10</span>
                         </div>
                     </div>
                 )}
@@ -194,13 +192,13 @@ export default function CourseCard({ course, showUniversity = true, onSaveChange
                             e.stopPropagation()
                             navigate(`/course/${course._id}`)
                         }}
-                        className="btn-primary flex-1 w-full text-xs sm:text-sm py-2.5 sm:py-2.5"
+                        className="bg-gray-900 hover:bg-gray-800 text-white font-semibold flex-1 w-full text-xs sm:text-sm py-2.5 rounded-lg transition-all"
                     >
                         View Details
                     </button>
                     <button
                         onClick={handleCompare}
-                        className="btn-secondary text-xs sm:text-sm px-3 sm:px-4 py-2.5 w-full sm:w-auto"
+                        className="bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-900 hover:text-gray-900 font-semibold text-xs sm:text-sm px-3 sm:px-4 py-2.5 w-full sm:w-auto rounded-lg transition-all"
                     >
                         Compare
                     </button>

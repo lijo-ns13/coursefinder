@@ -9,6 +9,8 @@
     "start": "node src/server.js",
     "seed": "node src/scripts/seed.js",
     "seed-accurate": "node src/scripts/seed-accurate-data.js",
+    "seed-comprehensive": "node src/scripts/seed-comprehensive.js",
+    "seed-comprehensive-clear": "node src/scripts/seed-comprehensive.js --clear",
     "fetch-data": "node src/scripts/fetch-live-data.js",
     "bulk-fetch": "node src/scripts/bulk-fetch-courses.js",
     "keep-alive": "node src/scripts/keep-alive.js",

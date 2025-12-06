@@ -13,6 +13,7 @@ export class AIController {
         ieltsScore,
         budget,
         preferredCourse,
+        category, // Use category if provided
         passedStatus,
         preferences
       } = req.body;
@@ -23,32 +24,136 @@ export class AIController {
         marks: typeof marks === 'string' ? JSON.parse(marks) : marks,
         ieltsScore,
         budget,
-        preferredCourse,
+        preferredCourse: preferredCourse || category, // Use category as fallback
         passedStatus,
         preferences: Array.isArray(preferences) ? preferences : []
       };
 
-      // Search courses based on filters
-      const courses = await CourseService.search(preferredCourse, {
-        country,
-        category: preferredCourse,
-        maxBudget: budget
-      });
+      // Determine search query and category filter
+      // Priority: category > preferredCourse > query search
+      const searchQuery = category || preferredCourse || '';
+      const categoryFilter = category || preferredCourse || null;
 
-      if (courses.length === 0) {
+      logger.info(`AI Filter - Search: "${searchQuery}", Category: "${categoryFilter}", Country: "${country}", Budget: ${budget}`);
+
+      // First, check if database has any courses at all
+      const totalCoursesInDB = await CourseService.getCourseCount();
+      logger.info(`Total courses in database: ${totalCoursesInDB}`);
+
+      // Search courses based on filters - use category for filtering
+      let searchFilters = {
+        country: country || undefined,
+        category: categoryFilter || undefined, // Use category filter properly
+        maxBudget: budget ? parseInt(budget) : undefined,
+        level: educationLevel || undefined,
+        limit: 100 // Increase limit to get more results
+      };
+
+      let courses = await CourseService.search(searchQuery, searchFilters);
+      
+      logger.info(`Found ${courses.length} courses matching filters`);
+
+      // If no courses found with category filter, try without category (broader search)
+      if (courses.length === 0 && categoryFilter) {
+        logger.info(`No courses found with category filter, trying broader search...`);
+        searchFilters = {
+          country: country || undefined,
+          maxBudget: budget ? parseInt(budget) : undefined,
+          level: educationLevel || undefined,
+          limit: 100
+        };
+        courses = await CourseService.search(searchQuery, searchFilters);
+        logger.info(`Found ${courses.length} courses in broader search`);
+      }
+
+      // If still no courses and database is empty, try fetching from external APIs
+      if (courses.length === 0 && totalCoursesInDB === 0) {
+        logger.info(`Database is empty, attempting to fetch from external APIs...`);
+        try {
+          const { DataFetcherService } = await import('../services/data-fetcher.service.js');
+          const fetchedCourses = await DataFetcherService.fetchAndStoreCourses({
+            query: searchQuery || categoryFilter || 'Engineering',
+            category: categoryFilter || 'Engineering',
+            country: country || '',
+            limit: 30
+          });
+          
+          if (fetchedCourses.length > 0) {
+            courses = fetchedCourses;
+            logger.info(`Fetched ${courses.length} courses from external APIs`);
+            // Retry search with newly fetched courses
+            courses = await CourseService.search(searchQuery, searchFilters);
+            logger.info(`After fetching, found ${courses.length} courses matching filters`);
+          }
+        } catch (fetchError) {
+          logger.error('Error fetching courses from external APIs:', fetchError.message);
+        }
+      } else if (courses.length === 0 && totalCoursesInDB > 0) {
+        // Database has courses but none match filters - try without category filter
+        logger.info(`Database has ${totalCoursesInDB} courses but none match filters, trying without category...`);
+        const relaxedFilters = {
+          country: country || undefined,
+          maxBudget: budget ? parseInt(budget) : undefined,
+          level: educationLevel || undefined,
+          limit: 50
+        };
+        courses = await CourseService.search('', relaxedFilters);
+        logger.info(`Found ${courses.length} courses with relaxed filters`);
+      }
+
+      // Additional client-side filtering if needed
+      let filteredCourses = courses;
+      
+      // Filter by category if provided (case-insensitive) - but only if we have courses
+      if (categoryFilter && courses.length > 0) {
+        filteredCourses = courses.filter(course => {
+          const courseCategory = (course.category || '').toLowerCase();
+          const courseName = (course.name || '').toLowerCase();
+          const courseDesc = (course.description || '').toLowerCase();
+          const filterCategory = categoryFilter.toLowerCase();
+          
+          return courseCategory.includes(filterCategory) || 
+                 courseName.includes(filterCategory) ||
+                 courseDesc.includes(filterCategory);
+        });
+        logger.info(`After category filter: ${filteredCourses.length} courses`);
+        
+        // If category filter removed all courses, use original courses (show all)
+        if (filteredCourses.length === 0 && courses.length > 0) {
+          logger.info(`Category filter too strict, using all ${courses.length} courses`);
+          filteredCourses = courses;
+        }
+      }
+
+      if (filteredCourses.length === 0) {
+        let message = 'No courses found matching your criteria.';
+        if (totalCoursesInDB === 0) {
+          message += ' Database appears to be empty. Please seed the database by running: npm run seed-accurate (or npm run seed)';
+        } else {
+          message += ' Try adjusting your filters or search terms.';
+        }
+        
         return res.json({
           success: true,
           recommendations: [],
-          message: 'No courses found matching your criteria'
+          message,
+          debug: {
+            searchQuery,
+            categoryFilter,
+            country,
+            totalCoursesInDB,
+            totalCoursesFound: courses.length,
+            filteredCourses: filteredCourses.length
+          }
         });
       }
 
-      // Get AI recommendations
-      const aiRecommendations = await AIService.filterCourses(userProfile, courses);
+      // Get AI recommendations (use filtered courses)
+      const aiRecommendations = await AIService.filterCourses(userProfile, filteredCourses);
 
       // Merge AI recommendations with course data
       const recommendations = aiRecommendations.recommendations.map(rec => {
-        const course = courses.find(c => c._id.toString() === rec.courseId);
+        const course = filteredCourses.find(c => c._id.toString() === rec.courseId);
         if (!course) return null;
 
         return {
@@ -63,7 +168,8 @@ export class AIController {
       res.json({
         success: true,
         recommendations,
-        totalCourses: courses.length
+        totalCourses: filteredCourses.length,
+        totalSearched: courses.length
       });
     } catch (error) {
       logger.error('AI filter error:', error);

@@ -52,7 +52,7 @@ export class AIService {
               model: model,
               messages: messages,
               temperature: 0.7,
-              max_tokens: 4000,
+              max_tokens: 2000, // Reduced to avoid token limit errors
               stream: false
             },
             {
@@ -92,36 +92,50 @@ export class AIService {
     return response.choices[0].message.content;
   }
 
+  // Helper function to simplify course data for AI processing
+  static simplifyCourseData(courses) {
+    return courses.map(course => ({
+      _id: course._id?.toString(),
+      name: course.name,
+      university: course.university?.name || 'N/A',
+      country: course.university?.location?.country || 'N/A',
+      fees: course.fees?.amount ? `${course.fees.currency} ${course.fees.amount}` : 'N/A',
+      ranking: course.university?.ranking || null,
+      acceptanceRate: course.university?.acceptanceRate || null,
+      ieltsMin: course.requirements?.ieltsMin || null,
+      minMarks: course.requirements?.minMarks || null,
+      category: course.category || 'N/A',
+      level: course.level || 'N/A'
+    }));
+  }
+
   static async filterCourses(userProfile, courses) {
-    const prompt = `You are an AI education counselor. Analyze this student profile and recommend the best-fit courses from the provided list.
+    // Limit to 10 courses and simplify data to reduce token usage
+    const limitedCourses = courses.slice(0, 10);
+    const simplifiedCourses = this.simplifyCourseData(limitedCourses);
+    
+    const prompt = `Analyze student profile and recommend best-fit courses.
 
-Student Profile:
-- Country Preference: ${userProfile.country}
-- Education Level: ${userProfile.educationLevel}
-- Marks: 10th: ${userProfile.marks?.tenth || 'N/A'}, 12th: ${userProfile.marks?.twelfth || 'N/A'}, Degree: ${userProfile.marks?.degree || 'N/A'}
-- IELTS Score: ${userProfile.ieltsScore || 'N/A'}
+Student:
+- Country: ${userProfile.country || 'Any'}
+- Level: ${userProfile.educationLevel || 'N/A'}
+- Marks: 10th:${userProfile.marks?.tenth || 'N/A'}, 12th:${userProfile.marks?.twelfth || 'N/A'}, Degree:${userProfile.marks?.degree || 'N/A'}
+- IELTS: ${userProfile.ieltsScore || 'N/A'}
 - Budget: ${userProfile.budget || 'N/A'} ${userProfile.budgetCurrency || 'USD'}
-- Preferred Course: ${userProfile.preferredCourse}
-- Status: ${userProfile.passedStatus}
+- Course: ${userProfile.preferredCourse || 'Any'}
 
-Available Courses:
-${JSON.stringify(courses.slice(0, 20), null, 2)}
+Courses (${simplifiedCourses.length}):
+${JSON.stringify(simplifiedCourses)}
 
-For each course, provide:
-1. Acceptance Probability (low/medium/high)
-2. Fit Score (1-10)
-3. One-sentence justification
-4. Key strengths for this student
-
-Return JSON format:
+For each course, return JSON:
 {
   "recommendations": [
     {
-      "courseId": "...",
+      "courseId": "course _id",
       "acceptanceProbability": "high|medium|low",
       "fitScore": 8,
-      "justification": "...",
-      "strengths": ["...", "..."]
+      "justification": "one sentence",
+      "strengths": ["strength1", "strength2"]
     }
   ]
 }`;
@@ -146,18 +160,16 @@ Return JSON format:
   }
 
   static async compareCourses(course1, course2, userProfile) {
-    // Simplify course data to avoid token limits
+    // Simplify course data to minimize token usage
     const simplifiedCourse1 = {
       name: course1.name,
       university: course1.university?.name,
       ranking: course1.university?.ranking,
       acceptanceRate: course1.university?.acceptanceRate,
-      fees: course1.fees,
-      location: course1.university?.location,
-      category: course1.category,
-      requirements: course1.requirements,
-      jobOutcomes: course1.jobOutcomes,
-      duration: course1.duration
+      fees: course1.fees?.amount ? `${course1.fees.currency} ${course1.fees.amount}` : 'N/A',
+      country: course1.university?.location?.country,
+      salary: course1.jobOutcomes?.averageSalary || null,
+      ieltsMin: course1.requirements?.ieltsMin || null
     };
 
     const simplifiedCourse2 = {
@@ -165,47 +177,47 @@ Return JSON format:
       university: course2.university?.name,
       ranking: course2.university?.ranking,
       acceptanceRate: course2.university?.acceptanceRate,
-      fees: course2.fees,
-      location: course2.university?.location,
-      category: course2.category,
-      requirements: course2.requirements,
-      jobOutcomes: course2.jobOutcomes,
-      duration: course2.duration
+      fees: course2.fees?.amount ? `${course2.fees.currency} ${course2.fees.amount}` : 'N/A',
+      country: course2.university?.location?.country,
+      salary: course2.jobOutcomes?.averageSalary || null,
+      ieltsMin: course2.requirements?.ieltsMin || null
     };
 
-    const prompt = `Compare these two university courses and provide a recommendation.
+    const prompt = `Compare 2 courses and recommend.
 
-Student Profile:
-- Country: ${userProfile?.country || 'Any'}
-- Education Level: ${userProfile?.educationLevel || 'N/A'}
-- Budget: ${userProfile?.budget || 'N/A'}
+Student: Country:${userProfile?.country || 'Any'}, Budget:${userProfile?.budget || 'N/A'}
 
-Course 1: ${simplifiedCourse1.name} at ${simplifiedCourse1.university}
-Course 2: ${simplifiedCourse2.name} at ${simplifiedCourse2.university}
+Course 1: ${simplifiedCourse1.name} @ ${simplifiedCourse1.university}
+- Fees: ${simplifiedCourse1.fees}
+- Rank: ${simplifiedCourse1.ranking || 'N/A'}
+- Acceptance: ${simplifiedCourse1.acceptanceRate || 'N/A'}%
+- Country: ${simplifiedCourse1.country || 'N/A'}
+- Salary: ${simplifiedCourse1.salary || 'N/A'}
+- IELTS: ${simplifiedCourse1.ieltsMin || 'N/A'}
 
-Compare:
-1. Fees
-2. Ranking
-3. Acceptance Rate
-4. Job Outcomes
-5. Location
-6. Overall Recommendation
+Course 2: ${simplifiedCourse2.name} @ ${simplifiedCourse2.university}
+- Fees: ${simplifiedCourse2.fees}
+- Rank: ${simplifiedCourse2.ranking || 'N/A'}
+- Acceptance: ${simplifiedCourse2.acceptanceRate || 'N/A'}%
+- Country: ${simplifiedCourse2.country || 'N/A'}
+- Salary: ${simplifiedCourse2.salary || 'N/A'}
+- IELTS: ${simplifiedCourse2.ieltsMin || 'N/A'}
 
-Return ONLY valid JSON:
+Return JSON only:
 {
   "comparison": {
-    "fees": "Brief comparison",
-    "ranking": "Brief comparison",
-    "acceptanceRate": "Brief comparison",
-    "courseContent": "Brief comparison",
-    "jobOutcomes": "Brief comparison",
-    "companyTieUps": "Brief comparison",
-    "campusLife": "Brief comparison",
-    "roiScore": "Brief comparison",
-    "visaSuccessRate": "Brief comparison"
+    "fees": "brief",
+    "ranking": "brief",
+    "acceptanceRate": "brief",
+    "courseContent": "brief",
+    "jobOutcomes": "brief",
+    "companyTieUps": "brief",
+    "campusLife": "brief",
+    "roiScore": "brief",
+    "visaSuccessRate": "brief"
   },
-  "verdict": "Which course is better and why",
-  "recommendation": "Final recommendation"
+  "verdict": "which is better",
+  "recommendation": "final rec"
 }`;
 
     const messages = [

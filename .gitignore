@@ -36,3 +36,12 @@ coverage/
 # Misc
 .cache/
 .temp/
+
+# Project docs / commit notes / local setup (keep out of repo)
+docs/
+documentation/
+notes/
+commit-notes/
+commit-logs/
+env-setup/
+setup/

@@ -19,7 +19,8 @@ export default function ComparisonPage() {
     if (selectedCourses.length === 2 && !comparisonData) {
       handleCompare()
     }
-  }, [selectedCourses])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCourses.length])
 
   const handleCompare = async () => {
     if (selectedCourses.length !== 2) {
